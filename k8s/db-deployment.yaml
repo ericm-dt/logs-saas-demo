@@ -1,0 +1,34 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shiptrackr-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shiptrackr-db
+  template:
+    metadata:
+      labels:
+        app: shiptrackr-db
+    spec:
+      containers:
+        - name: db
+          image: postgres:15
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: shiptrackr_user
+            - name: POSTGRES_PASSWORD
+              value: password
+            - name: POSTGRES_DB
+              value: shiptrackr_db
+          volumeMounts:
+            - name: sql-init
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: sql-init
+          configMap:
+            name: shiptrackr-sql

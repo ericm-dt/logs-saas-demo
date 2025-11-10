@@ -1,0 +1,21 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shiptrackr-locust
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shiptrackr-locust
+  template:
+    metadata:
+      labels:
+        app: shiptrackr-locust
+    spec:
+      containers:
+        - name: locust
+          image: shiptrackr-locust:latest
+          command: ["locust", "-f", "locustfile.py", "--headless", "-u", "10", "-r", "2", "--host", "http://shiptrackr-api"]
+          ports:
+            - containerPort: 8089

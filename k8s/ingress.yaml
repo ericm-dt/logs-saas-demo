@@ -1,0 +1,26 @@
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: shiptrackr-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: shiptrackr.local
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: shiptrackr-api
+                port:
+                  number: 80
+          - path: /locust
+            pathType: Prefix
+            backend:
+              service:
+                name: shiptrackr-locust
+                port:
+                  number: 8089

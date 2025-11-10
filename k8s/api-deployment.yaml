@@ -1,0 +1,23 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shiptrackr-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: shiptrackr-api
+  template:
+    metadata:
+      labels:
+        app: shiptrackr-api
+    spec:
+      containers:
+        - name: api
+          image: shiptrackr-api:latest
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - secretRef:
+                name: shiptrackr-secrets

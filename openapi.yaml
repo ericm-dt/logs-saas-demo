@@ -1,0 +1,200 @@
+
+openapi: 3.0.0
+info:
+  title: ShipTrackr API
+  version: 1.0.0
+  description: REST API for tracking and managing shipments across carriers.
+servers:
+  - url: https://api.shiptrackr.local/v1
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Shipment:
+      type: object
+      properties:
+        id:
+          type: integer
+        trackingNumber:
+          type: string
+        carrier:
+          type: string
+        createdBy:
+          type: integer
+    StatusUpdate:
+      type: object
+      properties:
+        shipmentId:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+        location:
+          type: string
+        status:
+          type: string
+    Escalation:
+      type: object
+      properties:
+        shipmentId:
+          type: integer
+        reason:
+          type: string
+        escalatedAt:
+          type: string
+          format: date-time
+
+security:
+  - bearerAuth: []
+
+paths:
+  /auth/login:
+    post:
+      summary: Authenticate user and return JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: JWT token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+
+  /shipments:
+    get:
+      summary: List shipments with optional filters
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: carrier
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of shipments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Shipment'
+    post:
+      summary: Create a new shipment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Shipment'
+      responses:
+        '201':
+          description: Shipment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Shipment'
+
+  /shipments/{id}:
+    get:
+      summary: Get shipment details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Shipment details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Shipment'
+
+  /shipments/{id}/history:
+    get:
+      summary: Get shipment status history
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Status history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StatusUpdate'
+
+  /shipments/{id}/escalate:
+    post:
+      summary: Escalate a shipment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Escalation'
+      responses:
+        '201':
+          description: Escalation recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Escalation'
+
+  /users/{id}/insights:
+    get:
+      summary: Get shipment insights for a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Insights report
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalShipments:
+                    type: integer
+                  delayedShipments:
+                    type: integer
+                  averageDeliveryTime:
+                    type: number
+                  topCarrier:
+                    type: string
